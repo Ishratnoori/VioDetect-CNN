@@ -1,10 +1,11 @@
 ### backend
 
-cd D:\viodetectcnn\viodetectcnn\backend
-python -m venv venv
-.\venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
+py -3.10 -m venv venv
+
+venv\Scripts\activate 
+
 pip install -r requirements.txt
+
 python app.py
 
 ### frontend

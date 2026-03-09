@@ -9,10 +9,10 @@ const Footer = () => {
           <span className="text-base font-bold text-foreground" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>VioDetect</span>
         </div>
         <p className="mb-2 text-sm text-muted-foreground">
-          AI-Powered Smart Surveillance System
+          VioDetect Smart Security Monitoring System
         </p>
         <p className="text-xs text-muted-foreground">
-            Deep Learning  2026
+              2026
         </p>
       </div>
     </footer>
