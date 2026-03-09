@@ -7,6 +7,7 @@ from flask_cors import CORS
 from PIL import Image
 import tempfile
 import base64
+from collections import Counter, deque
 
 app = Flask(__name__)
 CORS(app)
@@ -69,6 +70,9 @@ def preprocess_frame(frame):
     # ResNet50 preprocess_input expects 0-255 range images
     frame = preprocess_input(frame.astype(np.float32))
     return frame
+
+# Maintain a small buffer of recent live predictions for smoothing
+LIVE_LABEL_HISTORY = deque(maxlen=10)
 
 @app.route('/', methods=['GET'])
 def home():
@@ -196,12 +200,19 @@ def predict_frame():
         normal_idx = CLASS_NAMES.index('NormalVideos')
         normal_score = prediction[normal_idx]
         
-        if label != 'NormalVideos' and normal_score > 0.45: # Slightly higher threshold for single frames
+        if label != 'NormalVideos' and normal_score > 0.45:  # Slightly higher threshold for single frames
             label = 'NormalVideos'
             confidence = normal_score
 
-        primary_prediction = "Violent" if label != "NormalVideos" else "Non-Violent"
+        # --- Live smoothing: majority vote over last 10 frame labels ---
+        LIVE_LABEL_HISTORY.append(label)
+        if LIVE_LABEL_HISTORY:
+            majority_label, _ = Counter(LIVE_LABEL_HISTORY).most_common(1)[0]
+            label = majority_label
+        # ---------------------------------------------------------------
 
+        primary_prediction = "Violent" if label != "NormalVideos" else "Non-Violent"
+        
         return jsonify({
             'Primary Prediction': primary_prediction,
             'Detected Category': label,

@@ -128,6 +128,10 @@ const LiveDetection = ({ onPredictionChange }: LiveDetectionProps) => {
     onPredictionChange?.(result);
   }, [result, onPredictionChange]);
 
+  const detectedActivity = result?.["Detected Category"];
+  const isViolentActivity = detectedActivity && detectedActivity !== "NormalVideos";
+  const threatLevel = detectedActivity ? (isViolentActivity ? "VIOLENT" : "NON-VIOLENT") : null;
+
   return (
     <div className="w-full max-w-3xl mx-auto">
       <div className="relative aspect-video overflow-hidden rounded-3xl border border-white/10 bg-black/30 card-shadow">
@@ -175,7 +179,7 @@ const LiveDetection = ({ onPredictionChange }: LiveDetectionProps) => {
                 <div
                   className={cn(
                     "flex items-center gap-2 rounded-full border px-4 py-2 backdrop-blur-md",
-                    result?.["Primary Prediction"] === "Violent"
+                    isViolentActivity
                       ? "border-red-500/50 bg-red-500/20 text-red-100"
                       : "border-emerald-500/50 bg-emerald-500/20 text-emerald-100"
                   )}
@@ -183,11 +187,12 @@ const LiveDetection = ({ onPredictionChange }: LiveDetectionProps) => {
                   <div
                     className={cn(
                       "h-2 w-2 rounded-full",
-                      result?.["Primary Prediction"] === "Violent" ? "bg-red-500 animate-pulse-soft" : "bg-emerald-500 animate-pulse-soft"
+                      isViolentActivity ? "bg-red-500 animate-pulse-soft" : "bg-emerald-500 animate-pulse-soft"
                     )}
                   />
                   <span className="text-sm font-bold uppercase tracking-wider">
-                    Live Feed: {result ? (result["Primary Prediction"] === "Violent" ? "Threat Detected" : "Secure") : "Analyzing..."}
+                    Threat Level:{" "}
+                    {threatLevel ?? "Analyzing..."}
                   </span>
                 </div>
               </div>
@@ -209,7 +214,7 @@ const LiveDetection = ({ onPredictionChange }: LiveDetectionProps) => {
                 <div
                   className={cn(
                     "rounded-2xl border border-white/10 bg-black/45 p-6 backdrop-blur-xl shadow-2xl transition-all duration-500",
-                    result["Primary Prediction"] === "Violent" ? "ring-1 ring-red-500/30" : "ring-1 ring-emerald-500/30"
+                    isViolentActivity ? "ring-1 ring-red-500/30" : "ring-1 ring-emerald-500/30"
                   )}
                 >
                   <div className="flex items-center justify-between">
@@ -217,12 +222,10 @@ const LiveDetection = ({ onPredictionChange }: LiveDetectionProps) => {
                       <div
                         className={cn(
                           "rounded-2xl p-3",
-                          result["Primary Prediction"] === "Violent"
-                            ? "bg-red-500/15 text-red-200"
-                            : "bg-emerald-500/15 text-emerald-200"
+                          isViolentActivity ? "bg-red-500/15 text-red-200" : "bg-emerald-500/15 text-emerald-200"
                         )}
                       >
-                        {result["Primary Prediction"] === "Violent" ? (
+                        {isViolentActivity ? (
                           <ShieldAlert className="h-6 w-6" />
                         ) : (
                           <ShieldCheck className="h-6 w-6" />
@@ -230,12 +233,18 @@ const LiveDetection = ({ onPredictionChange }: LiveDetectionProps) => {
                       </div>
                       <div>
                         <div className="text-xs font-semibold uppercase opacity-60 mb-0.5 tracking-widest">
-                          Detection Status
+                          Threat Assessment
                         </div>
                         <div className="text-xl font-black">
-                          {result["Primary Prediction"] === "Violent"
-                            ? `ALERT: ${result["Detected Category"].toUpperCase()}`
-                            : "NO THREAT DETECTED"}
+                          Threat Level:{" "}
+                          <span
+                            className={cn(
+                              "ml-1",
+                              isViolentActivity ? "text-red-300" : "text-emerald-300"
+                            )}
+                          >
+                            {threatLevel}
+                          </span>
                         </div>
                       </div>
                     </div>
